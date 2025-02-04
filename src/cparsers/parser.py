@@ -1,6 +1,8 @@
 from .status import Status
 from .error import ParserError
 
+from copy import copy
+
 class Parser:
 
     def __init__(self, transformer):
@@ -35,8 +37,9 @@ class Parser:
     @classmethod
     def ChoiceOf(cls, *parsers):
         def check(status: Status) -> Status:
+            cstatus = copy(status)
             for pattern in parsers:
-                result = pattern.transformer(status)
+                result = pattern.transformer(cstatus)
                 if isinstance(result, ParserError): continue
                 return result
             # No match, return trace from the last attempt
@@ -69,12 +72,14 @@ class Parser:
     def map(self, function):
         def wrapper(status: Status) -> Status:
             current = self.transformer(status)
+            if isinstance(current, ParserError): return current
             return Status.result(function(current), status=status)
         return Parser(wrapper)
 
     def chain(self, function):
         def wrapper(status: Status) -> Status:
             current = self.transformer(status)
+            if isinstance(current, ParserError): return current
             nextParser = function(current)
             return nextParser.transformer(current)
         return Parser(wrapper)
