@@ -1,0 +1,6 @@
+-e git+ssh://git@github.com/Cieciak/parsers.git@fce76107e327df9ed9739136c30682a00c4b8371#egg=cparsers
+iniconfig==2.0.0
+packaging==24.2
+pluggy==1.5.0
+pytest==8.3.4
+setuptools==75.8.0
