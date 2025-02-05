@@ -4,6 +4,8 @@ from cparsers.parser import Parser
 
 import cparsers.string
 
+from pprint import pprint
+
 def test_word():
     p = StringParser.word('hello')
 
@@ -45,19 +47,41 @@ def test_expr():
     integer = cparsers.string.sint()
 
     add = Parser.ChoiceOf(
-        Parser.SequenceOf(Parser.Lazy(lambda: term), cparsers.string.regex(r'^\+'), Parser.Lazy(lambda: add)),
+        Parser.SequenceOf(
+            Parser.Lazy(lambda: term), 
+            cparsers.string.regex(r'^\+'), 
+            Parser.Lazy(lambda: add)
+        ),
+        Parser.SequenceOf(
+            Parser.Lazy(lambda: term),
+            cparsers.string.regex(r'^\+'),
+            Parser.Lazy(lambda: term),
+        ),
         Parser.Lazy(lambda: term),
     )
 
     term = Parser.ChoiceOf(
-        Parser.SequenceOf(cparsers.string.word('('), Parser.Lazy(lambda: add), cparsers.string.word(')')),
+        Parser.SequenceOf(
+            Parser.Lazy(lambda: fact),
+            cparsers.string.regex(r'^\*'),
+            Parser.Lazy(lambda: term)
+        ),
+        Parser.Lazy(lambda: fact),
+    )
+
+    fact = Parser.ChoiceOf(
+        Parser.SequenceOf(
+            cparsers.string.word('('),
+            Parser.Lazy(lambda: add),
+            cparsers.string.word(')')
+        ),
         integer,
     )
 
-    s = Status('1+(2+1)')
+    s = Status('10+(1+3*6)*(2+1)+6*6+7')
 
     r = add.run(s)
 
-    print(r)
+    pprint(r)
 
     assert 1 == 2
