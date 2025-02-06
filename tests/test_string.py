@@ -46,42 +46,53 @@ def test_expr():
 
     integer = cparsers.string.sint()
 
-    add = Parser.ChoiceOf(
-        Parser.SequenceOf(
-            Parser.Lazy(lambda: term), 
-            cparsers.string.regex(r'^\+'), 
-            Parser.Lazy(lambda: add)
-        ),
-        Parser.SequenceOf(
-            Parser.Lazy(lambda: term),
-            cparsers.string.regex(r'^\+'),
-            Parser.Lazy(lambda: term),
-        ),
-        Parser.Lazy(lambda: term),
-    )
+    # add = Parser.ChoiceOf(
+    #     Parser.SequenceOf(
+    #         Parser.Lazy(lambda: term), 
+    #         cparsers.string.regex(r'^\+'), 
+    #         Parser.Lazy(lambda: add)
+    #     ).map(lambda s: {'+': {s.result[0], s.result[2]}}),
+    #     Parser.SequenceOf(
+    #         Parser.Lazy(lambda: term),
+    #         cparsers.string.regex(r'^\+'),
+    #         Parser.Lazy(lambda: term),
+    #     ).map(lambda s: {'+': {s.result[0], s.result[2]}}),
+    #     Parser.Lazy(lambda: term),
+    # )
 
-    term = Parser.ChoiceOf(
-        Parser.SequenceOf(
-            Parser.Lazy(lambda: fact),
-            cparsers.string.regex(r'^\*'),
-            Parser.Lazy(lambda: term)
-        ),
-        Parser.Lazy(lambda: fact),
-    )
+    # term = Parser.ChoiceOf(
+    #     Parser.SequenceOf(
+    #         Parser.Lazy(lambda: fact),
+    #         cparsers.string.regex(r'^\*'),
+    #         Parser.Lazy(lambda: term)
+    #     ).map(lambda s: {'*': {s.result[0], s.result[2]}}),
+    #     Parser.Lazy(lambda: fact),
+    # )
 
-    fact = Parser.ChoiceOf(
-        Parser.SequenceOf(
-            cparsers.string.word('('),
-            Parser.Lazy(lambda: add),
-            cparsers.string.word(')')
-        ),
+    # fact = Parser.ChoiceOf(
+    #     Parser.SequenceOf(
+    #         cparsers.string.word('('),
+    #         Parser.Lazy(lambda: add),
+    #         cparsers.string.word(')')
+    #     ).map(lambda s: s.result[1]),
+    #     integer,
+    # )
+
+
+    p = Parser.SequenceOf(
         integer,
-    )
+        cparsers.string.word('+'),
+        integer,
+    ).map()
 
-    s = Status('10+(1+3*6)*(2+1)+6*6+7')
+    #p = integer
 
-    r = add.run(s)
 
-    pprint(r)
+    #s = Status('10+(1+3*6)*(2+1)+6*6+7')
+    s = Status('12+4')
 
-    assert 1 == 2
+    r = p.run(s)
+
+    pprint(r
+
+    assert 1 == 2 

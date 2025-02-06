@@ -16,7 +16,7 @@ class Parser:
         def check(status: Status) -> Status:
             if len(status.head) == 0: return ParserError("Unexpected EOF")
             flag = status.head[0] == target
-            if flag: return Status.result(status.head[0], status=status, increment=1)
+            if flag: return status.chainResult(status.head[0], increment=1)
             return ParserError(f"Cannot match [{status.head[0]}] with [{target}]")
         return cls(check)
 
@@ -31,7 +31,7 @@ class Parser:
                     return ParserError.propagate("Cannot get sequence", current)
                 result.append(current.result)
             # Ater loop the offset is at correct location, so we can just take the last loop result
-            return Status.result(result, status=current, increment=0)
+            return current.chainResult(result, increment=0)
         return cls(check)
 
     @classmethod
@@ -60,7 +60,7 @@ class Parser:
             # Strict mode disallows empty match
             if strict and (len(gathered) == 0): return ParserError.propagate("Matching many in strict mode failed", result)
             print("tried to return ")
-            return Status.result(gathered, status=current, increment=0)
+            return status.chainResult(gathered, increment=0)
         return cls(check)
 
     @classmethod
@@ -73,7 +73,10 @@ class Parser:
         def wrapper(status: Status) -> Status:
             current = self.transformer(status)
             if isinstance(current, ParserError): return current
-            return Status.result(function(current), status=status)
+            r = current.chainResult(function(current), increment=0)
+            print(f'map {r=}')
+            print(f'map {r.offset=}')
+            return r
         return Parser(wrapper)
 
     def chain(self, function):

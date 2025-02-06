@@ -24,6 +24,6 @@ def separated(sep: Parser):
                 temp = sep.transformer(next)
                 if isinstance(temp, ParserError): break
                 next = temp
-            return Status.result(gathered, status=next, increment=0)
+            return next.chainResult(gathered, increment=0)
         return Parser(transformer)
     return operator
