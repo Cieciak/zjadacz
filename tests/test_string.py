@@ -46,53 +46,79 @@ def test_expr():
 
     integer = cparsers.string.sint()
 
-    # add = Parser.ChoiceOf(
-    #     Parser.SequenceOf(
-    #         Parser.Lazy(lambda: term), 
-    #         cparsers.string.regex(r'^\+'), 
-    #         Parser.Lazy(lambda: add)
-    #     ).map(lambda s: {'+': {s.result[0], s.result[2]}}),
-    #     Parser.SequenceOf(
-    #         Parser.Lazy(lambda: term),
-    #         cparsers.string.regex(r'^\+'),
-    #         Parser.Lazy(lambda: term),
-    #     ).map(lambda s: {'+': {s.result[0], s.result[2]}}),
-    #     Parser.Lazy(lambda: term),
-    # )
+    add = Parser.ChoiceOf(
+        Parser.SequenceOf(
+            Parser.Lazy(lambda: term), 
+            cparsers.string.regex(r'^\+'), 
+            Parser.Lazy(lambda: add)
+        ).map(lambda s: {'+': [s.result[0], s.result[2]]}),
 
-    # term = Parser.ChoiceOf(
-    #     Parser.SequenceOf(
-    #         Parser.Lazy(lambda: fact),
-    #         cparsers.string.regex(r'^\*'),
-    #         Parser.Lazy(lambda: term)
-    #     ).map(lambda s: {'*': {s.result[0], s.result[2]}}),
-    #     Parser.Lazy(lambda: fact),
-    # )
+        Parser.Lazy(lambda: term),
+    )
 
-    # fact = Parser.ChoiceOf(
-    #     Parser.SequenceOf(
-    #         cparsers.string.word('('),
-    #         Parser.Lazy(lambda: add),
-    #         cparsers.string.word(')')
-    #     ).map(lambda s: s.result[1]),
-    #     integer,
-    # )
+    term = Parser.ChoiceOf(
+        Parser.SequenceOf(
+            Parser.Lazy(lambda: fact),
+            cparsers.string.regex(r'^\*'),
+            Parser.Lazy(lambda: term)
+        ).map(lambda s: {'*': [s.result[0], s.result[2]]}),
+        Parser.Lazy(lambda: fact),
+    )
 
-
-    p = Parser.SequenceOf(
+    fact = Parser.ChoiceOf(
+        Parser.SequenceOf(
+            cparsers.string.word('('),
+            Parser.Lazy(lambda: add),
+            cparsers.string.word(')')
+        ).map(lambda s: s.result[1]),
         integer,
-        cparsers.string.word('+'),
+    )
+
+    s = Status('10+(1+3*6)*(2+1)+6*6+7')
+    #s = Status('12+4')
+
+    r = add.run(s)
+
+    assert r.result == {'+': [10, {'+': [{'*': [{'+': [1, {'*': [3, 6]}]}, {'+': [2, 1]}]}, {'+': [{'*': [6, 6]}, 7]}]}]}
+
+def test_expr_eval():
+
+    integer = cparsers.string.sint()
+
+    add = Parser.ChoiceOf(
+        Parser.SequenceOf(
+            Parser.Lazy(lambda: term),
+            cparsers.string.word('+'),
+            Parser.Lazy(lambda: add),
+        ).map(lambda s: s.result[0] + s.result[2]),
+
+        Parser.Lazy(lambda: term),
+    )
+
+    term = Parser.ChoiceOf(
+        Parser.SequenceOf(
+            Parser.Lazy(lambda: fact),
+            cparsers.string.word('*'),
+            Parser.Lazy(lambda: term),
+        ).map(lambda s: s.result[0] * s.result[2]),
+
+        Parser.Lazy(lambda: fact),
+    )
+
+    fact = Parser.ChoiceOf(
+        Parser.SequenceOf(
+            cparsers.string.word('('),
+            Parser.Lazy(lambda: add),
+            cparsers.string.word(')'),
+        ).map(lambda s: s.result[1]),
+
         integer,
-    ).map()
+    )
 
-    #p = integer
+    text = '10+(1+3*6)*(2+1)+6*6+7+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1'
 
+    s = Status(text)
 
-    #s = Status('10+(1+3*6)*(2+1)+6*6+7')
-    s = Status('12+4')
+    r = add.run(s)
 
-    r = p.run(s)
-
-    pprint(r
-
-    assert 1 == 2 
+    assert r.result == eval(text)
