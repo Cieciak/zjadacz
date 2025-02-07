@@ -1,3 +1,4 @@
+from typing import Self
 from copy import copy
 
 class Status:
@@ -14,6 +15,10 @@ class Status:
     @property
     def head(self):
         return self.data[self.offset:]
+
+    @property
+    def copy(self) -> Self:
+        return copy(self)
 
     def chainResult(self, result, increment: int):
         # Create copy to avoid passing by reference

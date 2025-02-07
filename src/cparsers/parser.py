@@ -11,28 +11,28 @@ class Parser:
     def run(self, initial: Status) -> Status:
         return self.transformer(initial)
 
-    @classmethod
-    def Simplex(cls, target):
-        def check(status: Status) -> Status:
-            if len(status.head) == 0: return ParserError("Unexpected EOF")
-            flag = status.head[0] == target
-            if flag: return status.chainResult(status.head[0], increment=1)
-            return ParserError(f"Cannot match [{status.head[0]}] with [{target}]")
-        return cls(check)
+    # @classmethod
+    # def Simplex(cls, target):
+    #     def check(status: Status) -> Status:
+    #         if len(status.head) == 0: return ParserError("Unexpected EOF")
+    #         flag = status.head[0] == target
+    #         if flag: return status.chainResult(status.head[0], increment=1)
+    #         return ParserError(f"Cannot match [{status.head[0]}] with [{target}]")
+    #     return cls(check)
 
-    @classmethod
-    def SequenceOf(cls, *parsers):
-        def check(status: Status) -> Status:
-            result = []
-            current = status
-            for pattern in parsers:
-                current = pattern.transformer(current)
-                if isinstance(current, ParserError):
-                    return ParserError.propagate("Cannot get sequence", current)
-                result.append(current.result)
-            # Ater loop the offset is at correct location, so we can just take the last loop result
-            return current.chainResult(result, increment=0)
-        return cls(check)
+    # @classmethod
+    # def SequenceOf(cls, *parsers):
+    #     def check(status: Status) -> Status:
+    #         result = []
+    #         current = status
+    #         for pattern in parsers:
+    #             current = pattern.transformer(current)
+    #             if isinstance(current, ParserError):
+    #                 return ParserError.propagate("Cannot get sequence", current)
+    #             result.append(current.result)
+    #         # Ater loop the offset is at correct location, so we can just take the last loop result
+    #         return current.chainResult(result, increment=0)
+    #     return cls(check)
 
     @classmethod
     def ChoiceOf(cls, *parsers):

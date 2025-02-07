@@ -1,6 +1,7 @@
 from cparsers.status import Status
 from cparsers.string import StringParser
 from cparsers.parser import Parser
+from cparsers.helpers import *
 
 import cparsers.string
 
@@ -47,7 +48,7 @@ def test_expr():
     integer = cparsers.string.sint()
 
     add = Parser.ChoiceOf(
-        Parser.SequenceOf(
+        sequenceOf(
             Parser.Lazy(lambda: term), 
             cparsers.string.regex(r'^\+'), 
             Parser.Lazy(lambda: add)
@@ -57,7 +58,7 @@ def test_expr():
     )
 
     term = Parser.ChoiceOf(
-        Parser.SequenceOf(
+        sequenceOf(
             Parser.Lazy(lambda: fact),
             cparsers.string.regex(r'^\*'),
             Parser.Lazy(lambda: term)
@@ -66,7 +67,7 @@ def test_expr():
     )
 
     fact = Parser.ChoiceOf(
-        Parser.SequenceOf(
+        sequenceOf(
             cparsers.string.word('('),
             Parser.Lazy(lambda: add),
             cparsers.string.word(')')
@@ -86,7 +87,7 @@ def test_expr_eval():
     integer = cparsers.string.sint()
 
     add = Parser.ChoiceOf(
-        Parser.SequenceOf(
+        sequenceOf(
             Parser.Lazy(lambda: term),
             cparsers.string.word('+'),
             Parser.Lazy(lambda: add),
@@ -96,7 +97,7 @@ def test_expr_eval():
     )
 
     term = Parser.ChoiceOf(
-        Parser.SequenceOf(
+        sequenceOf(
             Parser.Lazy(lambda: fact),
             cparsers.string.word('*'),
             Parser.Lazy(lambda: term),
@@ -106,7 +107,7 @@ def test_expr_eval():
     )
 
     fact = Parser.ChoiceOf(
-        Parser.SequenceOf(
+        sequenceOf(
             cparsers.string.word('('),
             Parser.Lazy(lambda: add),
             cparsers.string.word(')'),

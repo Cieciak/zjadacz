@@ -2,10 +2,32 @@ from .status import Status
 from .error import ParserError
 from .parser import Parser
 
+from typing import Any
 
-def simplex(obj): return Parser.Simplex(obj)
+def simplex(target: Any):
+    '''Will match ony one static object'''
+    def check(status: Status) -> Status:
+        if len(status.head) == 0: return ParserError('Unexpected end of file')
 
-def sequenceOf(*parsers): return Parser.SequenceOf(*parsers)
+        if status.head[0] == target:
+            return status.chainResult(status.head[0], increment=1)
+        return ParserError(f'Can\'t match [{target}] to [{status.head[0]}]')
+    return Parser(check)
+
+def sequenceOf(*parsers: Parser):
+    def check(status: Status) -> Status:
+        result: list[Any] = list()
+        current = status.copy
+
+        for pattern in parsers:
+            current = pattern.transformer(current)
+            if isinstance(current, ParserError):
+                return ParserError.propagate("Can't get sequence", current)
+            result.append(current.result)
+
+        # After loop the offset is at correct location, so we can just take the last loop result
+        return current.chainResult(result, increment=0)
+    return Parser(check)
 
 def choiceOf(*parsers): return Parser.ChoiceOf(*parsers)
 
@@ -17,7 +39,7 @@ def lazy(thunk): return Parser.Lazy(thunk)
 
 def between(left: Parser, right: Parser):
     def operator(content: Parser):
-        return Parser.SequenceOf(left, content, right).map(
+        return sequenceOf(left, content, right).map(
             lambda status: status.result[1]
         )
     return operator

@@ -4,27 +4,27 @@ from cparsers.parser  import Parser
 from cparsers.helpers import *
 
 def test_parser():
-    simplex = Parser.Simplex("hello")
-    result = simplex.run(Status(["hello"]))
+    parser = simplex("hello")
+    result = parser.run(Status(["hello"]))
 
     assert result.result == "hello"
 
 def test_parser_sequence():
     sequence = sequenceOf(
-        Parser.Simplex("hello"),
-        Parser.Simplex("world"),
+        simplex("hello"),
+        simplex("world"),
     )
 
     result = sequence.run(Status(["hello", "world"]))
     assert result.result == ["hello", "world"]
 
 def test_parser_choice():
-    p = Parser.SequenceOf(
+    p = sequenceOf(
         Parser.ChoiceOf(
-            Parser.Simplex("milk"),
-            Parser.Simplex("brown"),
+            simplex("milk"),
+            simplex("brown"),
         ),
-        Parser.Simplex("chocolate"),
+        simplex("chocolate"),
     )
 
     r = p.run(Status(["milk", "chocolate"]))
@@ -39,7 +39,7 @@ def test_parser_choice():
 
 def test_parser_many():
     p = Parser.Many(
-        Parser.Simplex("egg"),
+        simplex("egg"),
     )
 
     r = p.run(Status(["egg", "egg", "egg"]))
@@ -50,7 +50,7 @@ def test_parser_many():
 
 def test_parser_strict_many():
     p = Parser.Many(
-        Parser.Simplex("egg"),
+        simplex("egg"),
         strict = True,
     )
 
@@ -61,10 +61,10 @@ def test_parser_strict_many():
     assert type(r) == ParserError
 
 def test_parser_map():
-    p = Parser.SequenceOf(
-        Parser.Simplex("["),
-        Parser.Simplex("egg"),
-        Parser.Simplex("]"),
+    p = sequenceOf(
+        simplex("["),
+        simplex("egg"),
+        simplex("]"),
     ).map(lambda s: s.result[1])
 
     r = p.run(Status(["[", "egg", "]"]))
@@ -80,8 +80,8 @@ def test_parser_chain():
     String = Parser(transformer)
 
     def selector(s: Status) -> Parser:
-        if   s.result == "hello": return Parser.Simplex("world")
-        elif s.result == "spam": return Parser.Many(Parser.Simplex("egg"), strict=True)
+        if   s.result == "hello": return simplex("world")
+        elif s.result == "spam": return Parser.Many(simplex("egg"), strict=True)
 
     p = String.chain(selector)
     r = p.run(Status(["hello", "world"]))
