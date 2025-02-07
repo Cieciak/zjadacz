@@ -57,27 +57,10 @@ def many(pattern: Parser, *, strict: bool = False):
         return current.chainResult(gathered, increment=0)
     return Parser(check)
 
-    # @classmethod
-    # def Many(cls, pattern, *, strict: bool = False):
-    #     def check(status: Status) -> Status:
-    #         gathered = []
-    #         current = status
-    #         # TODO: Safeguard this
-    #         while True:
-    #             result = pattern.transformer(current)
-    #             if isinstance(result, ParserError): break
-    #             gathered.append(result.result)
-    #             current = result
-    #         # Strict mode disallows empty match
-    #         if strict and (len(gathered) == 0): return ParserError.propagate("Matching many in strict mode failed", result)
-    #         print("tried to return ")
-    #         return status.chainResult(gathered, increment=0)
-    #     return cls(check)
-
-
-def lazy(thunk): return Parser.Lazy(thunk)
-
-
+def lazy(thunk):
+    def transformer(status: Status) -> Status:
+        return thunk().transformer(status)
+    return Parser(transformer)
 
 def between(left: Parser, right: Parser):
     def operator(content: Parser):

@@ -63,11 +63,11 @@ class Parser:
     #         return status.chainResult(gathered, increment=0)
     #     return cls(check)
 
-    @classmethod
-    def Lazy(cls, thunk):
-        def transformer(status: Status) -> Status:
-            return thunk().transformer(status)
-        return cls(transformer)
+    # @classmethod
+    # def Lazy(cls, thunk):
+    #     def transformer(status: Status) -> Status:
+    #         return thunk().transformer(status)
+    #     return cls(transformer)
 
     def map(self, function):
         def wrapper(status: Status) -> Status:

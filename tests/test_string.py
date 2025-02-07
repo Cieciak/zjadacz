@@ -49,27 +49,27 @@ def test_expr():
 
     add = choiceOf(
         sequenceOf(
-            Parser.Lazy(lambda: term), 
+            lazy(lambda: term), 
             cparsers.string.regex(r'^\+'), 
-            Parser.Lazy(lambda: add)
+            lazy(lambda: add)
         ).map(lambda s: {'+': [s.result[0], s.result[2]]}),
 
-        Parser.Lazy(lambda: term),
+        lazy(lambda: term),
     )
 
     term = choiceOf(
         sequenceOf(
-            Parser.Lazy(lambda: fact),
+            lazy(lambda: fact),
             cparsers.string.regex(r'^\*'),
-            Parser.Lazy(lambda: term)
+            lazy(lambda: term)
         ).map(lambda s: {'*': [s.result[0], s.result[2]]}),
-        Parser.Lazy(lambda: fact),
+        lazy(lambda: fact),
     )
 
     fact = choiceOf(
         sequenceOf(
             cparsers.string.word('('),
-            Parser.Lazy(lambda: add),
+            lazy(lambda: add),
             cparsers.string.word(')')
         ).map(lambda s: s.result[1]),
         integer,
@@ -88,28 +88,28 @@ def test_expr_eval():
 
     add = choiceOf(
         sequenceOf(
-            Parser.Lazy(lambda: term),
+            lazy(lambda: term),
             cparsers.string.word('+'),
-            Parser.Lazy(lambda: add),
+            lazy(lambda: add),
         ).map(lambda s: s.result[0] + s.result[2]),
 
-        Parser.Lazy(lambda: term),
+        lazy(lambda: term),
     )
 
     term = choiceOf(
         sequenceOf(
-            Parser.Lazy(lambda: fact),
+            lazy(lambda: fact),
             cparsers.string.word('*'),
-            Parser.Lazy(lambda: term),
+            lazy(lambda: term),
         ).map(lambda s: s.result[0] * s.result[2]),
 
-        Parser.Lazy(lambda: fact),
+        lazy(lambda: fact),
     )
 
     fact = choiceOf(
         sequenceOf(
             cparsers.string.word('('),
-            Parser.Lazy(lambda: add),
+            lazy(lambda: add),
             cparsers.string.word(')'),
         ).map(lambda s: s.result[1]),
 
