@@ -10,7 +10,7 @@ def test_parser():
     assert result.result == "hello"
 
 def test_parser_sequence():
-    sequence = Parser.SequenceOf(
+    sequence = sequenceOf(
         Parser.Simplex("hello"),
         Parser.Simplex("world"),
     )

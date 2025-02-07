@@ -5,16 +5,6 @@ from .parser import Parser
 
 def simplex(obj): return Parser.Simplex(obj)
 
-def sequenceOf(*parsers): return Parser.SequenceOf(*parsers)
-
-def choiceOf(*parsers): return Parser.ChoiceOf(*parsers)
-
-def many(pattern, *, strict: bool = False): return Parser.Many(pattern, strict=strict)
-
-def lazy(thunk): return Parser.Lazy(thunk)
-
-
-
 def between(left: Parser, right: Parser):
     def operator(content: Parser):
         return Parser.SequenceOf(left, content, right).map(
