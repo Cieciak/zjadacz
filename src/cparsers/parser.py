@@ -46,22 +46,22 @@ class Parser:
     #         return ParserError.propagate("All the path for choice failed", result)
     #     return cls(check)
 
-    @classmethod
-    def Many(cls, pattern, *, strict: bool = False):
-        def check(status: Status) -> Status:
-            gathered = []
-            current = status
-            # TODO: Safeguard this
-            while True:
-                result = pattern.transformer(current)
-                if isinstance(result, ParserError): break
-                gathered.append(result.result)
-                current = result
-            # Strict mode disallows empty match
-            if strict and (len(gathered) == 0): return ParserError.propagate("Matching many in strict mode failed", result)
-            print("tried to return ")
-            return status.chainResult(gathered, increment=0)
-        return cls(check)
+    # @classmethod
+    # def Many(cls, pattern, *, strict: bool = False):
+    #     def check(status: Status) -> Status:
+    #         gathered = []
+    #         current = status
+    #         # TODO: Safeguard this
+    #         while True:
+    #             result = pattern.transformer(current)
+    #             if isinstance(result, ParserError): break
+    #             gathered.append(result.result)
+    #             current = result
+    #         # Strict mode disallows empty match
+    #         if strict and (len(gathered) == 0): return ParserError.propagate("Matching many in strict mode failed", result)
+    #         print("tried to return ")
+    #         return status.chainResult(gathered, increment=0)
+    #     return cls(check)
 
     @classmethod
     def Lazy(cls, thunk):

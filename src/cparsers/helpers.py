@@ -41,7 +41,39 @@ def choiceOf(*parsers: Parser):
         return ParserError.propagate("All the path for choice failed", result)
     return Parser(check)
 
-def many(pattern, *, strict: bool = False): return Parser.Many(pattern, strict=strict)
+def many(pattern: Parser, *, strict: bool = False):
+    def check(status: Status) -> Status:
+        gathered: list[Any] = list()
+        current = status.copy
+
+        # TODO: Safe guard this
+        while True:
+            result = pattern.transformer(current)
+            if isinstance(result, ParserError): break
+            gathered.append(result.result)
+            current = result
+        
+        if strict and (len(gathered) == 0): return ParserError.propagate("Matching many in strict mode failed", result)
+        return current.chainResult(gathered, increment=0)
+    return Parser(check)
+
+    # @classmethod
+    # def Many(cls, pattern, *, strict: bool = False):
+    #     def check(status: Status) -> Status:
+    #         gathered = []
+    #         current = status
+    #         # TODO: Safeguard this
+    #         while True:
+    #             result = pattern.transformer(current)
+    #             if isinstance(result, ParserError): break
+    #             gathered.append(result.result)
+    #             current = result
+    #         # Strict mode disallows empty match
+    #         if strict and (len(gathered) == 0): return ParserError.propagate("Matching many in strict mode failed", result)
+    #         print("tried to return ")
+    #         return status.chainResult(gathered, increment=0)
+    #     return cls(check)
+
 
 def lazy(thunk): return Parser.Lazy(thunk)
 

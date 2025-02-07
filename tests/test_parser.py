@@ -38,18 +38,27 @@ def test_parser_choice():
 
 
 def test_parser_many():
-    p = Parser.Many(
-        simplex("egg"),
+    p = sequenceOf(
+        many(
+            simplex("egg"),
+        ),
+        simplex('goat')
+    )
+    r = p.run(Status(["egg", "egg", "egg", 'goat']))
+    assert r.result == [["egg", "egg", "egg"], 'goat']
+
+    parser = many(
+        simplex('egg'),
     )
 
-    r = p.run(Status(["egg", "egg", "egg"]))
-    assert r.result == ["egg", "egg", "egg"]
+    status = Status([])
 
-    r = p.run(Status([]))
-    assert r.result == []
+    result = parser.run(status)
+
+    assert result.result == []
 
 def test_parser_strict_many():
-    p = Parser.Many(
+    p = many(
         simplex("egg"),
         strict = True,
     )
@@ -81,7 +90,7 @@ def test_parser_chain():
 
     def selector(s: Status) -> Parser:
         if   s.result == "hello": return simplex("world")
-        elif s.result == "spam": return Parser.Many(simplex("egg"), strict=True)
+        elif s.result == "spam": return many(simplex("egg"), strict=True)
 
     p = String.chain(selector)
     r = p.run(Status(["hello", "world"]))
