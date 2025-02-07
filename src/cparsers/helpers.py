@@ -29,7 +29,17 @@ def sequenceOf(*parsers: Parser):
         return current.chainResult(result, increment=0)
     return Parser(check)
 
-def choiceOf(*parsers): return Parser.ChoiceOf(*parsers)
+def choiceOf(*parsers: Parser):
+    def check(status: Status) -> Status:
+        current = status.copy
+
+        for pattern in parsers:
+            result = pattern.transformer(current)
+            if isinstance(result, ParserError): continue
+            return result
+        # No match, return trace from last attempt, TODO: Decide how this should be handled
+        return ParserError.propagate("All the path for choice failed", result)
+    return Parser(check)
 
 def many(pattern, *, strict: bool = False): return Parser.Many(pattern, strict=strict)
 

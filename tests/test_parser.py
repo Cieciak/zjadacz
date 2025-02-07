@@ -20,7 +20,7 @@ def test_parser_sequence():
 
 def test_parser_choice():
     p = sequenceOf(
-        Parser.ChoiceOf(
+        choiceOf(
             simplex("milk"),
             simplex("brown"),
         ),

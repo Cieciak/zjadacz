@@ -34,17 +34,17 @@ class Parser:
     #         return current.chainResult(result, increment=0)
     #     return cls(check)
 
-    @classmethod
-    def ChoiceOf(cls, *parsers):
-        def check(status: Status) -> Status:
-            cstatus = copy(status)
-            for pattern in parsers:
-                result = pattern.transformer(cstatus)
-                if isinstance(result, ParserError): continue
-                return result
-            # No match, return trace from the last attempt
-            return ParserError.propagate("All the path for choice failed", result)
-        return cls(check)
+    # @classmethod
+    # def ChoiceOf(cls, *parsers):
+    #     def check(status: Status) -> Status:
+    #         cstatus = copy(status)
+    #         for pattern in parsers:
+    #             result = pattern.transformer(cstatus)
+    #             if isinstance(result, ParserError): continue
+    #             return result
+    #         # No match, return trace from the last attempt
+    #         return ParserError.propagate("All the path for choice failed", result)
+    #     return cls(check)
 
     @classmethod
     def Many(cls, pattern, *, strict: bool = False):
