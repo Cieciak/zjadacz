@@ -19,14 +19,9 @@ class StringParser(Parser):
     def regex(cls, regex: str):
         def check(s: Status) -> Status:
             matched = re.compile(regex).match(str(s.head))
-
             if matched: 
                 group = matched.group()
-                print(f'{group=}, {len(group)=}')
-
-                r = s.chainResult(group, increment=len(group))
-                print(f'{r.offset=}')
-                return r
+                return s.chainResult(group, increment=len(group))
             return ParserError(f'Cannot match {regex} with {s.head[:20]}')
         return cls(check)
     

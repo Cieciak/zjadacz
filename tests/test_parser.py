@@ -74,7 +74,7 @@ def test_parser_chain():
     def transformer(s: Status) -> Status:
         if len(s.head) == 0: return ParserError("Unexpected EOF")
         flag = isinstance(s.head[0], str)
-        if flag: return Status.result(s.head[0], status=s, increment=1)
+        if flag: return s.chainResult(s.head[0], increment=1)
         return ParserError("[{s.head[0]}] is not a string")
 
     String = Parser(transformer)
