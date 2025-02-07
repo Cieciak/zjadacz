@@ -1,41 +1,48 @@
 from sys import argv
 
-from cparsers.status import Status
-from cparsers import string
-from cparsers.parser import Parser
+from cparsers import *
 
-add = Parser.ChoiceOf(
-    Parser.SequenceOf(
-        Parser.Lazy(lambda: mul),
+##
+## ADD ::= | MUL [+-] ADD
+##         | MUL
+##
+add = choiceOf(
+    sequenceOf(
+        lazy(lambda: mul),
         string.regex(r'^[\+\-]'),
-        Parser.Lazy(lambda: add),
+        lazy(lambda: add),
     ).map(lambda s: s.result[0] + s.result[2] if s.result[1] == '+' else s.result[0] - s.result[2]),
 
-    Parser.Lazy(lambda: mul)
+    lazy(lambda: mul)
 )
 
-mul = Parser.ChoiceOf(
-    Parser.SequenceOf(
-        Parser.Lazy(lambda: fact),
+##
+## MUL ::= | FACT [*/] MUL
+##         | FACT
+##
+mul = choiceOf(
+    sequenceOf(
+        lazy(lambda: fact),
         string.regex(r'^[\*\/]'),
-        Parser.Lazy(lambda: mul),
+        lazy(lambda: mul),
     ).map(lambda s: s.result[0] * s.result[2] if s.result[1] == '*' else s.result[0] / s.result[2]),
 
-    Parser.Lazy(lambda: fact)
+    lazy(lambda: fact)
 )
 
-fact = Parser.ChoiceOf(
-    Parser.SequenceOf(
+##
+## FACT ::= | ( ADD )
+##          | SINT
+##
+fact = choiceOf(
+    sequenceOf(
         string.word('('),
-        Parser.Lazy(add),
+        lazy(lambda: add),
         string.word(')'),
     ).map(lambda s: s.result[1]),
 
     string.sint()
 )
 
-s = Status(argv[1])
-
-r = add.run(s)
-
-print(r.result)
+if __name__ == '__main__':
+    ...
