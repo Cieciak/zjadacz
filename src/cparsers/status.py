@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Self, Iterable
 from copy import copy
 
 class Status:
@@ -9,18 +9,18 @@ class Status:
         self.context = dict() if context is None else context
         self.result = None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'{self.result}'
 
     @property
-    def head(self):
+    def head(self) -> Iterable:
         return self.data[self.offset:]
 
     @property
     def copy(self) -> Self:
         return copy(self)
 
-    def chainResult(self, result, increment: int):
+    def chainResult(self, result, increment: int) -> Self:
         # Create copy to avoid passing by reference
         new = copy(self)
         new.offset += increment

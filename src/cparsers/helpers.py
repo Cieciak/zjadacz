@@ -1,10 +1,10 @@
+from typing import Any, Callable
+
 from .status import Status
 from .error import ParserError
 from .parser import Parser
 
-from typing import Any
-
-def simplex(target: Any):
+def simplex(target: Any) -> Parser:
     '''Will match ony one static object'''
     def check(status: Status) -> Status:
         if len(status.head) == 0: return ParserError('Unexpected end of file')
@@ -14,7 +14,7 @@ def simplex(target: Any):
         return ParserError(f'Can\'t match [{target}] to [{status.head[0]}]')
     return Parser(check)
 
-def sequenceOf(*parsers: Parser):
+def sequenceOf(*parsers: Parser) -> Parser:
     def check(status: Status) -> Status:
         result: list[Any] = list()
         current = status.copy
@@ -29,7 +29,7 @@ def sequenceOf(*parsers: Parser):
         return current.chainResult(result, increment=0)
     return Parser(check)
 
-def choiceOf(*parsers: Parser):
+def choiceOf(*parsers: Parser) -> Parser:
     def check(status: Status) -> Status:
         current = status.copy
 
@@ -41,7 +41,7 @@ def choiceOf(*parsers: Parser):
         return ParserError.propagate("All the path for choice failed", result)
     return Parser(check)
 
-def many(pattern: Parser, *, strict: bool = False):
+def many(pattern: Parser, *, strict: bool = False) -> Parser:
     def check(status: Status) -> Status:
         gathered: list[Any] = list()
         current = status.copy
@@ -57,19 +57,19 @@ def many(pattern: Parser, *, strict: bool = False):
         return current.chainResult(gathered, increment=0)
     return Parser(check)
 
-def lazy(thunk):
+def lazy(thunk: Callable[[], Parser]) -> Parser:
     def transformer(status: Status) -> Status:
         return thunk().transformer(status)
     return Parser(transformer)
 
-def between(left: Parser, right: Parser):
+def between(left: Parser, right: Parser) -> Parser:
     def operator(content: Parser):
         return sequenceOf(left, content, right).map(
             lambda status: status.result[1]
         )
     return operator
 
-def separated(sep: Parser):
+def separated(sep: Parser) -> Parser:
     def operator(content: Parser):
         def transformer(status: Status):
             gathered = []

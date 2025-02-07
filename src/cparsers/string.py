@@ -1,34 +1,26 @@
 import re
+from typing import Self
 
 from .status import Status
 from .error  import ParserError
 from .parser import Parser
-
-class StringParser(Parser):
-
-    @classmethod
-    def word(cls, text: str):
-        def check(s: Status) -> Status:
-            flag = str(s.head).startswith(text)
-
-            if flag: return s.chainResult(text, increment=len(text))
-            return ParserError(f'Cannot match {text} with {s.head[:len(text)]}')
-        return cls(check)
     
-    @classmethod
-    def regex(cls, regex: str):
-        def check(s: Status) -> Status:
-            matched = re.compile(regex).match(str(s.head))
-            if matched: 
-                group = matched.group()
-                return s.chainResult(group, increment=len(group))
-            return ParserError(f'Cannot match {regex} with {s.head[:20]}')
-        return cls(check)
-    
-def word(text: str): return StringParser.word(text)
+def word(text: str) -> Parser:
+    def check(status: Status) -> Status:
+        flag = str(status.head).startswith(text)
+        if flag: return status.chainResult(text, increment=len(text))
+        return ParserError(f'Cannot match {text} with {status.head[:len(text)]}')
+    return Parser(check)
 
-def regex(pattern: str): return StringParser.regex(pattern)
+def regex(pattern: str) -> Parser: 
+    def check(status: Status) -> Status:
+        matched = re.compile(pattern).match(str(status.head))
+        if matched:
+            group = matched.group()
+            return status.chainResult(group, increment=len(group))
+        return ParserError(f'Cannot match {regex} with {status.head[:20]}')
+    return Parser(check)
 
-def uint(): return StringParser.regex(r'[1-9][0-9]*').map(lambda s: int(s.result))
+def uint() -> Parser: return regex(r'[1-9][0-9]*').map(lambda s: int(s.result))
 
-def sint(): return StringParser.regex(r'[\-\+]?[1-9][0-9]*').map(lambda s: int(s.result))
+def sint() -> Parser: return regex(r'[\-\+]?[1-9][0-9]*').map(lambda s: int(s.result))

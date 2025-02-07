@@ -1,5 +1,4 @@
 from cparsers.status import Status
-from cparsers.string import StringParser
 from cparsers.parser import Parser
 from cparsers.helpers import *
 
@@ -8,7 +7,7 @@ import cparsers.string
 from pprint import pprint
 
 def test_word():
-    p = StringParser.word('hello')
+    p = cparsers.string.word('hello')
 
     s = Status('hello')
 
@@ -17,7 +16,7 @@ def test_word():
     assert r.result == 'hello'
 
 def test_regex():
-    p = StringParser.regex(r'^[0-9]{2}[a-z]{2}')
+    p = cparsers.string.regex(r'^[0-9]{2}[a-z]{2}')
 
     s = Status('24rg')
 
