@@ -45,4 +45,14 @@ fact = choiceOf(
 )
 
 if __name__ == '__main__':
-    ...
+    _, *formulas = argv
+
+    if len(formulas) == 0:
+        print('Please input formulas to evaluate')
+        quit()
+
+    for f in formulas:
+
+        r = add.run(Status(f))
+
+        print(f'{f} = {r.result}')
