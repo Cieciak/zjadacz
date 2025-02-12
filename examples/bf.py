@@ -5,10 +5,10 @@ from cparsers import *
 #
 
 inst = choiceOf(
-    many(word('+'), strict=True),
-    many(word('-'), strict=True),
-    many(word('>'), strict=True),
-    many(word('<'), strict=True),
+    many(word('+'), strict=True).map(lambda s: {'+': len(s.result)}),
+    many(word('-'), strict=True).map(lambda s: {'-': len(s.result)}),
+    many(word('>'), strict=True).map(lambda s: {'>': len(s.result)}),
+    many(word('<'), strict=True).map(lambda s: {'<': len(s.result)}),
     word('.'),
     word(','),
     lazy(lambda: loop),
@@ -32,8 +32,10 @@ loop = sequenceOf(
 
 prog = many(inst, strict=True)
 
+
+
 if __name__ == '__main__':
-    s = Status('[>+++<-]')
+    s = Status('++++[>+++[>++<-]<-]')
 
     r = prog.run(s)
 
