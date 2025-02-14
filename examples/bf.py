@@ -1,5 +1,7 @@
 from cparsers import *
 
+from cparsers.string import *
+
 #
 # INST ::= ["+"? | "-"? | ">"? | "<"? | "." | "?" | LOOP]
 #
