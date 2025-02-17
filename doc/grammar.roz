@@ -1,0 +1,17 @@
+IDENTIFIER ::= /[A-Z]+/
+
+CHOICE ::= ("[" EXPR (" " EXPR)* "]")
+
+SEQUENCE ::= ("(" EXPR (" " EXPR)* ")")
+
+MANY ::= (EXPR "*")
+
+MANY_STRICT ::= (EXPR "+")
+
+OPTION ::= (EXPR "?")
+
+ASSIGN ::= (IDENTIFIER "::=" EXPR)
+
+EXPR ::= [CHOICE SEQUENCE MANY MANY_STRICT OPTION IDENTIFIER]
+
+DIRECTIVE ::= "#" /[a-z]+/ /[.*\n]/
