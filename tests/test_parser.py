@@ -2,6 +2,7 @@ from cparsers.status  import Status
 from cparsers.error   import ParserError
 from cparsers.parser  import Parser
 from cparsers.helpers import *
+from cparsers import string
 
 def test_parser():
     parser = simplex("hello")
@@ -117,3 +118,21 @@ def test_separeted():
     r = p.run(Status(["eggs", ",", "eggs", ",", "eggs"]))
 
     assert r.result == ["eggs", "eggs", "eggs"]
+
+def test_optional():
+    data = "hello     world"
+
+    p = sequenceOf(
+        string.word("hello"),
+        string.word(" "),
+        optional(
+            string.regex(" +")
+        ),
+        string.word("world"),
+    ).map(
+        lambda s: (s.result[0], s.result[3])
+    )
+
+    r = p.run(Status(data))
+
+    assert r.result == ('hello', 'world')

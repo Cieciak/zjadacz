@@ -85,3 +85,12 @@ def separated(sep: Parser) -> Parser:
             return next.chainResult(gathered, increment=0)
         return Parser(transformer)
     return operator
+
+def optional(pattern: Parser) -> Parser:
+    def transformer(status: Status) -> Status:
+        result = pattern.transformer(status.copy)
+
+        if isinstance(result, ParserError): return status
+
+        return result
+    return Parser(transformer)
