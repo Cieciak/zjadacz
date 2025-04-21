@@ -136,6 +136,39 @@ def print_result(result: cparsers.Status | cparsers.ParserError):
         case cparsers.ParserError():
             print(result)
 
+def compile_def(ast: dict, glob):
+    name = ast['name']
+    body = compile_ast(ast['body'], glob)
+
+    return name, body
+
+def compile_ast(ast: dict, glob):
+    if type(ast['expr']) == str:
+        body = glob[ast['expr']]
+    elif type(ast['expr']) == dict:
+        expr = ast['expr']
+        if 'sequence' in expr.keys():
+            p = [
+                compile_ast(inner, glob) for inner in expr['sequence']
+            ]
+            body = cparsers.sequenceOf(*p)
+        elif 'choice' in expr.keys():
+            p = [
+                compile_ast(inner, glob) for inner in expr['choice']
+            ]
+            body = cparsers.choiceOf(*p)
+
+    match ast['mod']:
+        case '*':
+            return cparsers.many(body)
+        case '+':
+            return cparsers.many(body, strict=True)
+        case '?':
+            return cparsers.optional(body)
+        case '':
+            return body
+
+
 if __name__ == '__main__':
     
 
@@ -153,3 +186,35 @@ if __name__ == '__main__':
     root = build_parser()
     result = run_file(path, root)
     print_result(result)
+
+    path = "examples/rozwik/samples/04.roz"
+    root = build_parser()
+    result = run_file(path, root)
+    print_result(result)
+
+    glob = {
+        'HELLO': cparsers.string.word('Hello'),
+        'WELCOME': cparsers.string.word('Welcome'),
+        'WORLD': cparsers.string.word('World'),
+
+        'SPC': cparsers.string.word(' '),
+    }
+
+    defined: dict[str, cparsers.Parser] = {}
+
+    for definition in result.result:
+        name, parser = compile_def(definition, glob)
+
+        defined[name] = parser
+
+    r = defined['TARGET'].run(cparsers.Status('HelloHello'))
+    print_result(r)
+    
+    r = defined['GREET'].run(cparsers.Status('Hello World'))
+    print_result(r)
+
+    r = defined['OTHER'].run(cparsers.Status('Hello World'))
+    print_result(r)
+
+    r = defined['OTHER'].run(cparsers.Status('Welcome World'))
+    print_result(r)
