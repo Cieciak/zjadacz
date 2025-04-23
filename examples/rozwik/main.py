@@ -190,7 +190,7 @@ if __name__ == '__main__':
     result = run_file(path, root)
     print_result(result)
 
-    path = "examples/rozwik/samples/04.roz"
+    path = "examples/rozwik/samples/05.roz"
     root = build_parser()
     result = run_file(path, root)
     print_result(result)
@@ -199,25 +199,17 @@ if __name__ == '__main__':
         'HELLO': cparsers.string.word('Hello'),
         'WELCOME': cparsers.string.word('Welcome'),
         'WORLD': cparsers.string.word('World'),
+        'NUMBER': cparsers.string.sint(),
 
         'SPC': cparsers.string.word(' '),
     }
 
-    defined: dict[str, cparsers.Parser] = {}
-
     for definition in result.result:
         name, parser = compile_def(definition, glob)
 
-        defined[name] = parser
+        glob[name] = parser
 
-    r = defined['TARGET'].run(cparsers.Status('HelloHello'))
-    print_result(r)
-    
-    r = defined['GREET'].run(cparsers.Status('Hello World'))
-    print_result(r)
+        pprint.pprint(glob)
 
-    r = defined['OTHER'].run(cparsers.Status('Hello World'))
-    print_result(r)
-
-    r = defined['OTHER'].run(cparsers.Status('Welcome World'))
+    r = glob['TARGET'].run(cparsers.Status('Hello World 334 565 '))
     print_result(r)
