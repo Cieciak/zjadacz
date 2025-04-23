@@ -1,5 +1,6 @@
 TEST::=(HELLO SPC WORLD);
 
 ARR::=(NUMBER SPC)+;
+REG::=/[A-Z]+/;
 
 TARGET::=(TEST SPC ARR);
