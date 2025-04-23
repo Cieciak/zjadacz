@@ -14,7 +14,10 @@ modifier = cparsers.choiceOf(
 endl = cparsers.sequenceOf(
     cparsers.string.word(";"),
     cparsers.optional(
-        cparsers.string.word('\n'),
+        cparsers.many(
+            cparsers.string.word('\n'),
+            strict=True,
+        )
     )
 )
 
