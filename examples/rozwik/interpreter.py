@@ -1,8 +1,16 @@
 import cparsers
 import cparsers.string
 
+from typing import Callable, Any
 import pprint
 import sys
+
+
+decorator = cparsers.sequenceOf(
+    cparsers.string.word("@"),
+    cparsers.string.regex("[a-z]+"),
+    cparsers.string.word('\n'),
+).map(lambda s: {'decorator': s.result[1]})
 
 identifier = cparsers.string.regex("[A-Z]+")
 walrus = cparsers.string.word("::=")
@@ -23,6 +31,7 @@ endl = cparsers.sequenceOf(
 )
 regex = cparsers.string.regex('/(?<=/)(.*?)(?=/)/').map(lambda s: {'regex': s.result})
 scpSep = cparsers.separated(cparsers.string.word(" "))
+
 
 def build_parser():
 
@@ -62,14 +71,16 @@ def build_parser():
     )
 
     definition = cparsers.sequenceOf(
+        cparsers.optional(decorator).map(lambda s: s.result if s.result else {}),
         identifier,
         walrus,
         expr,
         endl,
     ).map(
         lambda s: {
-            'name': s.result[0],
-            'body': s.result[2],
+            'name': s.result[1],
+            'body': s.result[3],
+            'deco': s.result[0] if 'decorator' in s.result[0] else None,
         }
     )
 
@@ -103,9 +114,14 @@ def print_result(result: cparsers.Status | cparsers.ParserError):
         case cparsers.ParserError():
             print(result)
 
-def compile_def(ast: dict, glob):
+def compile_def(ast: dict, glob, maps: dict[str, Callable[[cparsers.Status], Any]]):
     name = ast['name']
     body = compile_ast(ast['body'], glob)
+
+    deco = ast['deco']
+    if deco:
+        wrapper = maps[deco['decorator']]
+        body = body.map(wrapper)
 
     return name, body
 
@@ -158,10 +174,15 @@ if __name__ == '__main__':
         'SPC': cparsers.string.word(' '),
     }
 
+    maps: dict[str, Callable[[cparsers.Status], Any]] = {
+        'unwraparr': lambda s: [item[0] for item in s.result],
+        'id': lambda s: s.result,
+    }
+
     for definition in result.result:
-        name, parser = compile_def(definition, glob)
+        name, parser = compile_def(definition, glob, maps)
 
         glob[name] = parser
 
-    r = glob['TARGET'].run(cparsers.Status('Hello World 334 565 '))
+    r = glob['TARGET'].run(cparsers.Status('Hello World 334 565 2137 '))
     print_result(r)
