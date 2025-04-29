@@ -6,12 +6,7 @@ import pprint
 import sys
 
 
-decorator = cparsers.sequenceOf(
-    cparsers.string.word("@"),
-    cparsers.string.regex("[a-z]+"),
-    cparsers.string.word('\n'),
-).map(lambda s: {'decorator': s.result[1]})
-
+# Parser names
 identifier = cparsers.string.regex("[A-Z]+")
 walrus = cparsers.string.word("::=")
 modifier = cparsers.choiceOf(
@@ -69,6 +64,13 @@ def build_parser():
             'mod': s.result[1]
         }
     )
+
+
+    decorator = cparsers.sequenceOf(
+        cparsers.string.word("@"),
+        cparsers.string.regex("[a-z]+"),
+        cparsers.string.word('\n'),
+    ).map(lambda s: {'decorator': s.result[1]})
 
     definition = cparsers.sequenceOf(
         cparsers.optional(decorator).map(lambda s: s.result if s.result else {}),
