@@ -6,7 +6,6 @@ import pprint
 import sys
 
 
-# Parser names
 identifier = cparsers.string.regex("[A-Z]+")
 walrus = cparsers.string.word("::=")
 modifier = cparsers.choiceOf(
@@ -28,7 +27,7 @@ regex = cparsers.string.regex('/(?<=/)(.*?)(?=/)/').map(lambda s: {'regex': s.re
 scpSep = cparsers.separated(cparsers.string.word(" "))
 
 
-def build_parser():
+def build_parser() -> cparsers.Parser:
 
     sequence = cparsers.sequenceOf(
         cparsers.string.word("("),
@@ -156,35 +155,89 @@ def compile_ast(ast: dict, glob):
             return body
 
 
+def compileDefinitionToPython(ast: dict, *, parsers = {}, maps = {}):
+    name = ast['name']
+    body = ast['body']
+    deco = ast['deco']
+
+    body = compileToPython(body)
+
+    if deco:
+        body += '.map(' + deco['decorator'] + ')'
+
+    print(f'{name}={body}')
+
+
+def compileToPython(ast: dict):
+    if type(ast['expr']) == str:
+        body = ast['expr']
+    elif type(ast['expr']) == dict:
+        expr = ast['expr']
+        if 'sequence' in expr.keys():
+            p = [
+                compileToPython(inner) for inner in expr['sequence']
+            ]
+            body = 'SEQUENCE([' + ', '.join(p) + '])' 
+        elif 'choice' in expr.keys():
+            p = [
+                compileToPython(inner) for inner in expr['choice']
+            ]
+            body = 'CHOICE([' + ', '.join(p) + '])'
+        elif 'regex' in expr.keys():
+            body = 'REGEX(' + expr['regex'] + ')'
+
+    match ast['mod']:
+        case '*':
+            return f'MANY({body})'
+        case '+':
+            return f'MANY({body}, strict=True)'
+        case '':
+            return f'{body}'
+
 if __name__ == '__main__':
     root = build_parser()
     path = sys.argv[1]
-
+    
     try: result = run_file(path, root)
     except FileNotFoundError:
-        print(f"Can\'t find \"{path}\" file!")
+        print(f'Can\'t find \"{path}\" file!')
         quit()
 
-    print_result(result)
-
-    glob = {
-        'HELLO': cparsers.string.word('Hello'),
-        'WELCOME': cparsers.string.word('Welcome'),
-        'WORLD': cparsers.string.word('World'),
-        'NUMBER': cparsers.string.sint(),
-
-        'SPC': cparsers.string.word(' '),
-    }
-
-    maps: dict[str, Callable[[cparsers.Status], Any]] = {
-        'unwraparr': lambda s: [item[0] for item in s.result],
-        'id': lambda s: s.result,
-    }
-
     for definition in result.result:
-        name, parser = compile_def(definition, glob, maps)
+        print('\n' + '#' * 80)
+        print(definition)
+        compileDefinitionToPython(definition)
 
-        glob[name] = parser
 
-    r = glob['TARGET'].run(cparsers.Status('Hello World 334 565 2137 '))
-    print_result(r)
+# if __name__ == '__main__':
+#     root = build_parser()
+#     path = sys.argv[1]
+
+#     try: result = run_file(path, root)
+#     except FileNotFoundError:
+#         print(f"Can\'t find \"{path}\" file!")
+#         quit()
+
+#     print_result(result)
+
+#     glob = {
+#         'HELLO': cparsers.string.word('Hello'),
+#         'WELCOME': cparsers.string.word('Welcome'),
+#         'WORLD': cparsers.string.word('World'),
+#         'NUMBER': cparsers.string.sint(),
+
+#         'SPC': cparsers.string.word(' '),
+#     }
+
+#     maps: dict[str, Callable[[cparsers.Status], Any]] = {
+#         'unwraparr': lambda s: [item[0] for item in s.result],
+#         'id': lambda s: s.result,
+#     }
+
+#     for definition in result.result:
+#         name, parser = compile_def(definition, glob, maps)
+
+#         glob[name] = parser
+
+#     r = glob['TARGET'].run(cparsers.Status('Hello World 334 565 2137 '))
+#     print_result(r)
