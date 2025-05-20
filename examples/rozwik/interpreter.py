@@ -5,6 +5,8 @@ from typing import Callable, Any
 import pprint
 import sys
 
+import loader
+
 
 identifier = cparsers.string.regex("[A-Z]+")
 walrus = cparsers.string.word("::=")
@@ -163,9 +165,9 @@ def compileDefinitionToPython(ast: dict, *, parsers = {}, maps = {}):
     body = compileToPython(body)
 
     if deco:
-        body += '.map(' + deco['decorator'] + ')'
+        body += '.map(ext_m[\'' + deco['decorator'] + '\'])'
 
-    print(f'{name}={body}')
+    return f'{name}={body}'
 
 
 def compileToPython(ast: dict):
@@ -177,26 +179,38 @@ def compileToPython(ast: dict):
             p = [
                 compileToPython(inner) for inner in expr['sequence']
             ]
-            body = 'SEQUENCE([' + ', '.join(p) + '])' 
+            body = 'cparsers.sequenceOf(' + ', '.join(p) + ')' 
         elif 'choice' in expr.keys():
             p = [
                 compileToPython(inner) for inner in expr['choice']
             ]
-            body = 'CHOICE([' + ', '.join(p) + '])'
+            body = 'cparsers.choiceOf(' + ', '.join(p) + ')'
         elif 'regex' in expr.keys():
-            body = 'REGEX(' + expr['regex'] + ')'
+            body = 'cparsers.string.regex(r\"' + expr['regex'][1:-1] + '\")'
 
     match ast['mod']:
         case '*':
-            return f'MANY({body})'
+            return f'cparsers.many({body})'
         case '+':
-            return f'MANY({body}, strict=True)'
+            return f'cparsers.many({body}, strict=True)'
         case '':
             return f'{body}'
 
 if __name__ == '__main__':
     root = build_parser()
     path = sys.argv[1]
+    ext_p, ext_m = loader.importExtension('examples/rozwik/ext/01.py')
+
+    body = '''
+import cparsers
+import cparsers.string
+
+import sys
+import loader
+
+ext_p, ext_m = loader.importExtension('examples/rozwik/ext/01.py')
+
+def build_parser():'''
     
     try: result = run_file(path, root)
     except FileNotFoundError:
@@ -206,7 +220,22 @@ if __name__ == '__main__':
     for definition in result.result:
         print('\n' + '#' * 80)
         print(definition)
-        compileDefinitionToPython(definition)
+        body += '\n    ' + compileDefinitionToPython(definition, parsers=ext_p, maps=ext_m)
+
+    body += '\n    return TARGET\n'
+
+    body += '''
+if __name__ == '__main__':
+    root = build_parser()
+    data = sys.argv[1]
+
+    s = cparsers.Status(data)
+    r = root.run(s)
+    print(r)
+'''
+
+    with open('examples/rozwik/out.py', 'w') as file:
+        file.write(body)
 
 
 # if __name__ == '__main__':

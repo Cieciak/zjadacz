@@ -1,0 +1,10 @@
+DIGIT::=/\d/;
+
+@fromdigits
+NUMBER::=DIGIT+;
+
+@firstelement
+ELEMENT::=(NUMBER /a/);
+
+@secondelement
+TARGET::=(/a/ ELEMENT+);
