@@ -9,3 +9,6 @@ cleanall:
 
 init:
 	./scripts/init.sh $$(pwd)
+
+initdev:
+	./scripts/dev.sh $$(pwd)
