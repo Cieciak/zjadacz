@@ -1,6 +1,7 @@
--e git+ssh://git@github.com/Cieciak/parsers.git@bd827b80485eb088d1a804cccbf931fc7e0b88f3#egg=cparsers
+build==1.2.2.post1
 iniconfig==2.0.0
 packaging==24.2
 pluggy==1.5.0
+pyproject_hooks==1.2.0
 pytest==8.3.4
 setuptools==75.8.0
