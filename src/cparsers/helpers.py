@@ -94,3 +94,8 @@ def optional(pattern: Parser) -> Parser:
 
         return result
     return Parser(transformer)
+
+def future() -> Parser:
+    def panic(status: Status):
+        raise RuntimeError('transformer is not defined')
+    return Parser(panic)
