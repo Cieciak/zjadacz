@@ -25,3 +25,6 @@ class Parser:
             nextParser = function(current)
             return nextParser.transformer(current)
         return Parser(wrapper)
+        
+    def reassign(self, parser: Self):
+        self.transformer = parser.transformer
