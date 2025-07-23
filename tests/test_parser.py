@@ -136,3 +136,21 @@ def test_optional():
     r = p.run(Status(data))
 
     assert r.result == ('hello', 'world')
+
+def test_match():
+
+    data = "d20:12\ncoin:heads\noracle:yes\n"
+
+    cases = {
+        'd20': string.uint(),
+        'coin': choiceOf(string.word('heads'), string.word('tails')),
+        'oracle': choiceOf(string.word('yes'), string.word('no')),
+    }
+
+    key_val_parser = sequenceOf(string.regex('[a-z0-9]+'), string.word(':')).map(lambda s: s.result[0]).match(cases)
+
+    many_parser = many(sequenceOf(key_val_parser, string.word('\n')).map(lambda s: s.result[0]))
+
+    r = many_parser.run(Status(data))
+
+    assert r.result == [12, 'heads', 'yes']

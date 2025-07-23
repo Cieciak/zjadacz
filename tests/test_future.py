@@ -68,6 +68,4 @@ def test_future_array():
 
     r = array_parser.run(s)
 
-    print(r.result == [1, [2,3], 4, [5, 6, 7], [8, [9,10]]])
-
-    assert 1==2
+    assert r.result == [1, [2,3], 4, [5, 6, 7], [8, [9,10]]]

@@ -24,6 +24,15 @@ class Parser:
             if isinstance(current, ParserError): return current
             nextParser = function(current)
             return nextParser.transformer(current)
+        return Parser(wrapper)    
+    
+    def match(self, cases: dict) -> Self:
+        def wrapper(status: Status) -> Status:
+            current = self.run(status)
+            if isinstance(current, ParserError): return current
+
+            nextParser = cases[current.result]
+            return nextParser.run(current)
         return Parser(wrapper)
         
     def reassign(self, parser: Self):
