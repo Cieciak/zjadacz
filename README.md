@@ -14,7 +14,6 @@ It works for **me**.
     pip3 install zjadacz
     ```
 
-> I can't be bothered to put this on PyPi rigth now, maybe later.
 
 ## Building
 
