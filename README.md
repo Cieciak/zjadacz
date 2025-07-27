@@ -9,13 +9,9 @@ It works for **me**.
 
 ## Installing
 
-1. Download file `.whl` file
+1. Install using pip3
     ```
-    wget https://github.com/Cieciak/parsers/raw/refs/heads/main/dist/cparsers-0.2.0-py3-none-any.whl
-    ```
-2. Install using pip3
-    ```
-    pip3 install cparsers*.whl
+    pip3 install zjadacz
     ```
 
 > I can't be bothered to put this on PyPi rigth now, maybe later.
@@ -24,7 +20,7 @@ It works for **me**.
 
 1. Clone repository
     ```
-    git clone https://github.com/Cieciak/parsers.git
+    git clone https://github.com/Cieciak/zjadacz.git
     ```
 
 2. Initialize Python virtual enviroment
