@@ -1,14 +1,14 @@
-import cparsers
+import zjadacz
 
-AAA = cparsers.many(cparsers.string.word('A'))
-BBB = cparsers.many(cparsers.string.word('B'))
+AAA = zjadacz.many(zjadacz.string.word('A'))
+BBB = zjadacz.many(zjadacz.string.word('B'))
 
 
 PARSERS = {
     'AAA': AAA,
     'BBB': BBB,
 
-    'TES': cparsers.choiceOf(AAA, BBB),
+    'TES': zjadacz.choiceOf(AAA, BBB),
 }
 
 def mul(arr):

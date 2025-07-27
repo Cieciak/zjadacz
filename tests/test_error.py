@@ -1,4 +1,4 @@
-from cparsers.error import ParserError
+from zjadacz.error import ParserError
 
 def test_error():
     err = ParserError("test")

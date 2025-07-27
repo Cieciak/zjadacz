@@ -1,61 +1,61 @@
-import cparsers
-import cparsers.string
+import zjadacz
+import zjadacz.string
 
 import pprint
 
-identifier = cparsers.string.regex("[A-Z]+")
-walrus = cparsers.string.word("::=")
-modifier = cparsers.choiceOf(
-    cparsers.string.word("*"), # Many modifier
-    cparsers.string.word("+"), # At least one modifier
-    cparsers.string.word("?"), # Optional modifier
-    cparsers.string.word(""),
+identifier = zjadacz.string.regex("[A-Z]+")
+walrus = zjadacz.string.word("::=")
+modifier = zjadacz.choiceOf(
+    zjadacz.string.word("*"), # Many modifier
+    zjadacz.string.word("+"), # At least one modifier
+    zjadacz.string.word("?"), # Optional modifier
+    zjadacz.string.word(""),
 )
-endl = cparsers.sequenceOf(
-    cparsers.string.word(";"),
-    cparsers.optional(
-        cparsers.many(
-            cparsers.string.word('\n'),
+endl = zjadacz.sequenceOf(
+    zjadacz.string.word(";"),
+    zjadacz.optional(
+        zjadacz.many(
+            zjadacz.string.word('\n'),
             strict=True,
         )
     )
 )
 
-scpSep = cparsers.separated(cparsers.string.word(" "))
+scpSep = zjadacz.separated(zjadacz.string.word(" "))
 
 def build_parser1():
-    sequence = cparsers.sequenceOf(
-        cparsers.string.word("("),
-        cparsers.lazy(lambda: expr),
-        cparsers.many(
-            cparsers.sequenceOf(
-                cparsers.string.word(" "),
-                cparsers.lazy(lambda: expr),
+    sequence = zjadacz.sequenceOf(
+        zjadacz.string.word("("),
+        zjadacz.lazy(lambda: expr),
+        zjadacz.many(
+            zjadacz.sequenceOf(
+                zjadacz.string.word(" "),
+                zjadacz.lazy(lambda: expr),
             ).map(lambda s: s.result[1::2])
         ).map(lambda s: [item[0] for item in s.result]),
-        cparsers.string.word(")"),
+        zjadacz.string.word(")"),
     ).map(lambda s: {"sequence": [s.result[1], *s.result[2]]})
 
 
-    expr = cparsers.sequenceOf(
-        cparsers.choiceOf(
+    expr = zjadacz.sequenceOf(
+        zjadacz.choiceOf(
             sequence,
             identifier,
         ),
-        cparsers.choiceOf(
-            cparsers.word('*'),
-            cparsers.word(''),
+        zjadacz.choiceOf(
+            zjadacz.word('*'),
+            zjadacz.word(''),
         ),
     )
 
-    definition = cparsers.sequenceOf(
+    definition = zjadacz.sequenceOf(
         identifier,
         walrus,
         expr,
-        cparsers.string.word(";"),
+        zjadacz.string.word(";"),
     )
 
-    parser = cparsers.many(
+    parser = zjadacz.many(
         definition,
     )
 
@@ -63,28 +63,28 @@ def build_parser1():
 
 def build_parser():
 
-    sequence = cparsers.sequenceOf(
-        cparsers.string.word("("),
-        scpSep(cparsers.lazy(lambda: expr)),
-        cparsers.string.word(")")
+    sequence = zjadacz.sequenceOf(
+        zjadacz.string.word("("),
+        scpSep(zjadacz.lazy(lambda: expr)),
+        zjadacz.string.word(")")
     ).map(
         lambda s: {
             'sequence': s.result[1],
         }
     )
 
-    choice = cparsers.sequenceOf(
-        cparsers.string.word("["),
-        scpSep(cparsers.lazy(lambda: expr)),
-        cparsers.string.word("]")
+    choice = zjadacz.sequenceOf(
+        zjadacz.string.word("["),
+        scpSep(zjadacz.lazy(lambda: expr)),
+        zjadacz.string.word("]")
     ).map(
         lambda s: {
             'choice': s.result[1],
         }
     )
 
-    expr = cparsers.sequenceOf(
-        cparsers.choiceOf(
+    expr = zjadacz.sequenceOf(
+        zjadacz.choiceOf(
             sequence,
             choice,
             identifier,
@@ -97,7 +97,7 @@ def build_parser():
         }
     )
 
-    definition = cparsers.sequenceOf(
+    definition = zjadacz.sequenceOf(
         identifier,
         walrus,
         expr,
@@ -109,7 +109,7 @@ def build_parser():
         }
     )
 
-    parser = cparsers.many(
+    parser = zjadacz.many(
         definition
     )
 
@@ -124,19 +124,19 @@ def load_file(path: str) -> str:
 
     return data
 
-def run_file(path: str, parser: cparsers.Parser) -> str:
+def run_file(path: str, parser: zjadacz.Parser) -> str:
     print("\n" + "#" * 80 + "\n" + "#" * 80 + f"\nRunning file: {path}\n")
 
     data = load_file(path)
     print(f"File data:\n{data}\n")
 
-    return parser.run(cparsers.Status(data))
+    return parser.run(zjadacz.Status(data))
 
-def print_result(result: cparsers.Status | cparsers.ParserError):
+def print_result(result: zjadacz.Status | zjadacz.ParserError):
     match result:
-        case cparsers.Status():
+        case zjadacz.Status():
             pprint.pprint(result.result)
-        case cparsers.ParserError():
+        case zjadacz.ParserError():
             print(result)
 
 def compile_def(ast: dict, glob):
@@ -154,20 +154,20 @@ def compile_ast(ast: dict, glob):
             p = [
                 compile_ast(inner, glob) for inner in expr['sequence']
             ]
-            body = cparsers.sequenceOf(*p)
+            body = zjadacz.sequenceOf(*p)
         elif 'choice' in expr.keys():
             p = [
                 compile_ast(inner, glob) for inner in expr['choice']
             ]
-            body = cparsers.choiceOf(*p)
+            body = zjadacz.choiceOf(*p)
 
     match ast['mod']:
         case '*':
-            return cparsers.many(body)
+            return zjadacz.many(body)
         case '+':
-            return cparsers.many(body, strict=True)
+            return zjadacz.many(body, strict=True)
         case '?':
-            return cparsers.optional(body)
+            return zjadacz.optional(body)
         case '':
             return body
 
@@ -196,12 +196,12 @@ if __name__ == '__main__':
     print_result(result)
 
     glob = {
-        'HELLO': cparsers.string.word('Hello'),
-        'WELCOME': cparsers.string.word('Welcome'),
-        'WORLD': cparsers.string.word('World'),
-        'NUMBER': cparsers.string.sint(),
+        'HELLO': zjadacz.string.word('Hello'),
+        'WELCOME': zjadacz.string.word('Welcome'),
+        'WORLD': zjadacz.string.word('World'),
+        'NUMBER': zjadacz.string.sint(),
 
-        'SPC': cparsers.string.word(' '),
+        'SPC': zjadacz.string.word(' '),
     }
 
     for definition in result.result:
@@ -211,5 +211,5 @@ if __name__ == '__main__':
 
         pprint.pprint(glob)
 
-    r = glob['TARGET'].run(cparsers.Status('Hello World 334 565 '))
+    r = glob['TARGET'].run(zjadacz.Status('Hello World 334 565 '))
     print_result(r)

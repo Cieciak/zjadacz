@@ -1,5 +1,5 @@
-import cparsers
-import cparsers.string
+import zjadacz
+import zjadacz.string
 
 from typing import Callable, Any
 import pprint
@@ -8,51 +8,51 @@ import sys
 import loader
 
 
-identifier = cparsers.string.regex("[A-Z]+")
-walrus = cparsers.string.word("::=")
-modifier = cparsers.choiceOf(
-    cparsers.string.word("*"), # Many modifier
-    cparsers.string.word("+"), # At least one modifier
-    cparsers.string.word("?"), # Optional modifier
-    cparsers.string.word(""),
+identifier = zjadacz.string.regex("[A-Z]+")
+walrus = zjadacz.string.word("::=")
+modifier = zjadacz.choiceOf(
+    zjadacz.string.word("*"), # Many modifier
+    zjadacz.string.word("+"), # At least one modifier
+    zjadacz.string.word("?"), # Optional modifier
+    zjadacz.string.word(""),
 )
-endl = cparsers.sequenceOf(
-    cparsers.string.word(";"),
-    cparsers.optional(
-        cparsers.many(
-            cparsers.string.word('\n'),
+endl = zjadacz.sequenceOf(
+    zjadacz.string.word(";"),
+    zjadacz.optional(
+        zjadacz.many(
+            zjadacz.string.word('\n'),
             strict=True,
         )
     )
 )
-regex = cparsers.string.regex('/(?<=/)(.*?)(?=/)/').map(lambda s: {'regex': s.result})
-scpSep = cparsers.separated(cparsers.string.word(" "))
+regex = zjadacz.string.regex('/(?<=/)(.*?)(?=/)/').map(lambda s: {'regex': s.result})
+scpSep = zjadacz.separated(zjadacz.string.word(" "))
 
 
-def build_parser() -> cparsers.Parser:
+def build_parser() -> zjadacz.Parser:
 
-    sequence = cparsers.sequenceOf(
-        cparsers.string.word("("),
-        scpSep(cparsers.lazy(lambda: expr)),
-        cparsers.string.word(")")
+    sequence = zjadacz.sequenceOf(
+        zjadacz.string.word("("),
+        scpSep(zjadacz.lazy(lambda: expr)),
+        zjadacz.string.word(")")
     ).map(
         lambda s: {
             'sequence': s.result[1],
         }
     )
 
-    choice = cparsers.sequenceOf(
-        cparsers.string.word("["),
-        scpSep(cparsers.lazy(lambda: expr)),
-        cparsers.string.word("]")
+    choice = zjadacz.sequenceOf(
+        zjadacz.string.word("["),
+        scpSep(zjadacz.lazy(lambda: expr)),
+        zjadacz.string.word("]")
     ).map(
         lambda s: {
             'choice': s.result[1],
         }
     )
 
-    expr = cparsers.sequenceOf(
-        cparsers.choiceOf(
+    expr = zjadacz.sequenceOf(
+        zjadacz.choiceOf(
             sequence,
             choice,
             regex,
@@ -67,14 +67,14 @@ def build_parser() -> cparsers.Parser:
     )
 
 
-    decorator = cparsers.sequenceOf(
-        cparsers.string.word("@"),
-        cparsers.string.regex("[a-z]+"),
-        cparsers.string.word('\n'),
+    decorator = zjadacz.sequenceOf(
+        zjadacz.string.word("@"),
+        zjadacz.string.regex("[a-z]+"),
+        zjadacz.string.word('\n'),
     ).map(lambda s: {'decorator': s.result[1]})
 
-    definition = cparsers.sequenceOf(
-        cparsers.optional(decorator).map(lambda s: s.result if s.result else {}),
+    definition = zjadacz.sequenceOf(
+        zjadacz.optional(decorator).map(lambda s: s.result if s.result else {}),
         identifier,
         walrus,
         expr,
@@ -87,7 +87,7 @@ def build_parser() -> cparsers.Parser:
         }
     )
 
-    parser = cparsers.many(
+    parser = zjadacz.many(
         definition
     )
 
@@ -102,22 +102,22 @@ def load_file(path: str) -> str:
 
     return data
 
-def run_file(path: str, parser: cparsers.Parser) -> str:
+def run_file(path: str, parser: zjadacz.Parser) -> str:
     print("\n" + "#" * 80 + "\n" + "#" * 80 + f"\nRunning file: {path}\n")
 
     data = load_file(path)
     print(f"File data:\n{data}\n")
 
-    return parser.run(cparsers.Status(data))
+    return parser.run(zjadacz.Status(data))
 
-def print_result(result: cparsers.Status | cparsers.ParserError):
+def print_result(result: zjadacz.Status | zjadacz.ParserError):
     match result:
-        case cparsers.Status():
+        case zjadacz.Status():
             pprint.pprint(result.result)
-        case cparsers.ParserError():
+        case zjadacz.ParserError():
             print(result)
 
-def compile_def(ast: dict, glob, maps: dict[str, Callable[[cparsers.Status], Any]]):
+def compile_def(ast: dict, glob, maps: dict[str, Callable[[zjadacz.Status], Any]]):
     name = ast['name']
     body = compile_ast(ast['body'], glob)
 
@@ -137,22 +137,22 @@ def compile_ast(ast: dict, glob):
             p = [
                 compile_ast(inner, glob) for inner in expr['sequence']
             ]
-            body = cparsers.sequenceOf(*p)
+            body = zjadacz.sequenceOf(*p)
         elif 'choice' in expr.keys():
             p = [
                 compile_ast(inner, glob) for inner in expr['choice']
             ]
-            body = cparsers.choiceOf(*p)
+            body = zjadacz.choiceOf(*p)
         elif 'regex' in expr.keys():
-            body = cparsers.string.regex(expr['regex'])
+            body = zjadacz.string.regex(expr['regex'])
 
     match ast['mod']:
         case '*':
-            return cparsers.many(body)
+            return zjadacz.many(body)
         case '+':
-            return cparsers.many(body, strict=True)
+            return zjadacz.many(body, strict=True)
         case '?':
-            return cparsers.optional(body)
+            return zjadacz.optional(body)
         case '':
             return body
 

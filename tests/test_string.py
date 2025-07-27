@@ -1,13 +1,13 @@
-from cparsers.status import Status
-from cparsers.parser import Parser
-from cparsers.helpers import *
+from zjadacz.status import Status
+from zjadacz.parser import Parser
+from zjadacz.helpers import *
 
-import cparsers.string
+import zjadacz.string
 
 from pprint import pprint
 
 def test_word():
-    p = cparsers.string.word('hello')
+    p = zjadacz.string.word('hello')
 
     s = Status('hello')
 
@@ -16,7 +16,7 @@ def test_word():
     assert r.result == 'hello'
 
 def test_regex():
-    p = cparsers.string.regex(r'^[0-9]{2}[a-z]{2}')
+    p = zjadacz.string.regex(r'^[0-9]{2}[a-z]{2}')
 
     s = Status('24rg')
 
@@ -26,7 +26,7 @@ def test_regex():
 
 def test_helpers():
 
-    p = cparsers.string.uint()
+    p = zjadacz.string.uint()
 
     s = Status('2137')
 
@@ -34,7 +34,7 @@ def test_helpers():
 
     assert r.result == 2137
 
-    p = cparsers.string.sint()
+    p = zjadacz.string.sint()
 
     s = Status('-3621')
 
@@ -44,12 +44,12 @@ def test_helpers():
 
 def test_expr():
 
-    integer = cparsers.string.sint()
+    integer = zjadacz.string.sint()
 
     add = choiceOf(
         sequenceOf(
             lazy(lambda: term), 
-            cparsers.string.regex(r'^\+'), 
+            zjadacz.string.regex(r'^\+'), 
             lazy(lambda: add)
         ).map(lambda s: {'+': [s.result[0], s.result[2]]}),
 
@@ -59,7 +59,7 @@ def test_expr():
     term = choiceOf(
         sequenceOf(
             lazy(lambda: fact),
-            cparsers.string.regex(r'^\*'),
+            zjadacz.string.regex(r'^\*'),
             lazy(lambda: term)
         ).map(lambda s: {'*': [s.result[0], s.result[2]]}),
         lazy(lambda: fact),
@@ -67,9 +67,9 @@ def test_expr():
 
     fact = choiceOf(
         sequenceOf(
-            cparsers.string.word('('),
+            zjadacz.string.word('('),
             lazy(lambda: add),
-            cparsers.string.word(')')
+            zjadacz.string.word(')')
         ).map(lambda s: s.result[1]),
         integer,
     )
@@ -83,12 +83,12 @@ def test_expr():
 
 def test_expr_eval():
 
-    integer = cparsers.string.sint()
+    integer = zjadacz.string.sint()
 
     add = choiceOf(
         sequenceOf(
             lazy(lambda: term),
-            cparsers.string.word('+'),
+            zjadacz.string.word('+'),
             lazy(lambda: add),
         ).map(lambda s: s.result[0] + s.result[2]),
 
@@ -98,7 +98,7 @@ def test_expr_eval():
     term = choiceOf(
         sequenceOf(
             lazy(lambda: fact),
-            cparsers.string.word('*'),
+            zjadacz.string.word('*'),
             lazy(lambda: term),
         ).map(lambda s: s.result[0] * s.result[2]),
 
@@ -107,9 +107,9 @@ def test_expr_eval():
 
     fact = choiceOf(
         sequenceOf(
-            cparsers.string.word('('),
+            zjadacz.string.word('('),
             lazy(lambda: add),
-            cparsers.string.word(')'),
+            zjadacz.string.word(')'),
         ).map(lambda s: s.result[1]),
 
         integer,

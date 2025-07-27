@@ -1,4 +1,4 @@
-from cparsers.status import Status
+from zjadacz.status import Status
 
 def test_status():
     status = Status(["hello", "world"])

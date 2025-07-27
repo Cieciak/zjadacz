@@ -1,6 +1,6 @@
 from sys import argv
 
-from cparsers import *
+from zjadacz import *
 
 ##
 ## ADD ::= | MUL [+-] ADD

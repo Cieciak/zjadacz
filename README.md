@@ -1,4 +1,4 @@
-# cparsers
+# zjadacz
 
 Parser combinator library written in Python.  
 It's simple, greedy, and doesn't handle recursion.  

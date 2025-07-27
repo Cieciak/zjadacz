@@ -1,6 +1,6 @@
-from cparsers import *
+from zjadacz import *
 
-from cparsers.string import *
+from zjadacz.string import *
 
 #
 # INST ::= ["+"? | "-"? | ">"? | "<"? | "." | "?" | LOOP]

@@ -1,8 +1,8 @@
-from cparsers.status  import Status
-from cparsers.error   import ParserError
-from cparsers.parser  import Parser
-from cparsers.helpers import *
-from cparsers import string
+from zjadacz.status  import Status
+from zjadacz.error   import ParserError
+from zjadacz.parser  import Parser
+from zjadacz.helpers import *
+from zjadacz import string
 
 def test_parser():
     parser = simplex("hello")

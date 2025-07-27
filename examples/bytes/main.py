@@ -1,6 +1,6 @@
-import cparsers
+import zjadacz
 from typing import Callable
-from cparsers import Status, ParserError, Parser
+from zjadacz import Status, ParserError, Parser
 
 from pprint import pprint
 
@@ -27,7 +27,7 @@ def getByte() -> Parser:
     return Parser(consumer)
 
 
-getDoubleword = cparsers.sequenceOf(
+getDoubleword = zjadacz.sequenceOf(
     getWord(),
     getWord(),
 ).map(lambda s: s.result[1] + 256 * s.result[0])
@@ -52,7 +52,7 @@ def getOpts() -> Parser:
 
 
         
-tcp_head = cparsers.sequenceOf(
+tcp_head = zjadacz.sequenceOf(
     getWord(),
     getWord(),
     getDoubleword,
@@ -76,14 +76,14 @@ tcp_head = cparsers.sequenceOf(
     }
 ).chain(lambda s: Parser(addContext))
 
-tcp = cparsers.sequenceOf(
+tcp = zjadacz.sequenceOf(
     tcp_head,
     getOpts(),
 )
 
 if __name__ == '__main__':
 
-    status = cparsers.Status(b'\x1f\x90\x00\x60\x00\x00\x00\x01\x00\x00\x00\x00\x60\x02\x20\x00\x00\x00\x00\x01\x01\x01\x01\x01')
+    status = zjadacz.Status(b'\x1f\x90\x00\x60\x00\x00\x00\x01\x00\x00\x00\x00\x60\x02\x20\x00\x00\x00\x00\x01\x01\x01\x01\x01')
 
     root = tcp
 
